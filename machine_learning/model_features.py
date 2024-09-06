@@ -726,57 +726,6 @@ class ModelFeatures:
 
         return self.dataset
 
-    def create_tsi_opt_feature(
-        self,
-        source: pd.Series,
-        short_length: int = 13,
-        long_length: int = 25,
-        ma_type: Literal['sma', 'ema', 'dema', 'tema', 'rma'] = 'ema',
-    ):
-        """
-        Create the TSI (True Strength Index) feature.
-
-        Parameters:
-        -----------
-        source : pd.Series
-            The source series for calculating the TSI.
-        short_length : int, optional
-            The length of the faster MA.
-            (default: 13)
-        long_length : int, optional
-            The length of the slower MA.
-            (default: 25)
-        ma_type : Literal['sma', 'ema', 'dema', 'tema', 'rma'], optional
-            The moving average method to use for TSI calculation.
-            (default: 'ema')
-
-        Returns:
-        --------
-        pd.DataFrame
-            The dataset with the TSI feature added.
-        """
-        self.logger.info("Calculating TSI...")
-        start = time.perf_counter()
-
-        self.dataset["TSI"] = ta.tsi(
-            source=source,
-            short_length=short_length,
-            long_length=long_length,
-            ma_method=ma_type,
-        ).rolling(2).std().diff()
-
-        self.dataset.loc[:, "TSI_feat"] = feature_binning(
-            self.dataset["TSI"],
-            self.test_index,
-            self.bins,
-        )
-
-        self.logger.info(
-            "TSI calculated in %.2f seconds.", time.perf_counter() - start
-        )
-
-        return self.dataset
-
     def create_ichimoku_feature(
         self,
         conversion_periods: int,
