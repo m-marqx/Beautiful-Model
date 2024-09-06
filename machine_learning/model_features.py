@@ -618,57 +618,6 @@ class ModelFeatures:
 
         return self.dataset
 
-    def create_trix_opt_feature(
-        self,
-        source: pd.Series,
-        length: int = 15,
-        signal_length: int = 1,
-        method: Literal['sma', 'ema', 'dema', 'tema', 'rma'] = 'ema',
-    ):
-        """
-        Create the TRIX (Triple Exponential Moving Average) feature.
-
-        Parameters:
-        -----------
-        source : pd.Series
-            The source series for calculating the TRIX.
-        length : int, optional
-            The length of the TRIX calculation.
-            (default: 15)
-        signal_length : int, optional
-            The length of the signal line.
-            (default: 1)
-        method : Literal['sma', 'ema', 'dema', 'tema', 'rma'], optional
-            The moving average method to use for TRIX calculation.
-            (default: 'ema')
-
-        Returns:
-        --------
-        pd.DataFrame
-            The dataset with the TRIX feature added.
-        """
-        self.logger.info("Calculating TRIX...")
-        start = time.perf_counter()
-        source = source.copy().pct_change().rolling(2).std().iloc[2:]
-
-        self.dataset["TRIX"] = (
-            ta.TRIX(source, length, signal_length, method)
-            .rolling(2).std()
-            .diff()
-        )
-
-        self.dataset.loc[:, "TRIX_feat"] = feature_binning(
-            self.dataset["TRIX"],
-            self.test_index,
-            self.bins,
-        )
-
-        self.logger.info(
-            "TRIX calculated in %.2f seconds.", time.perf_counter() - start
-        )
-
-        return self.dataset
-
     def create_smio_feature(
         self,
         source: pd.Series,
