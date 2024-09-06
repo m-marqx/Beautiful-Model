@@ -198,42 +198,6 @@ class ModelFeatures:
 
         return self.dataset
 
-    def create_rsi_opt_feature(
-        self,
-        source: pd.Series,
-        length: int,
-        ma_method: Literal['sma', 'ema', 'dema', 'rma'] = 'sma'
-    ):
-        """
-        Create the RSI (Relative Strength Index) feature.
-
-        Parameters:
-        -----------
-        source : pd.Series
-            The source series for calculating RSI.
-        length : int
-            The length of the RSI calculation.
-
-        Returns:
-        --------
-        pd.DataFrame
-            The dataset with the RSI feature added.
-        """
-        self.logger.info("Calculating RSI...")
-        start = time.perf_counter()
-
-        self.dataset["RSI"] = ta.RSI(source, length, ma_method).rolling(2).std().diff()
-        self.dataset.loc[:, "RSI_feat"] = feature_binning(
-            self.dataset["RSI"],
-            self.test_index,
-            self.bins,
-        )
-        self.logger.info(
-            "RSI calculated in %.2f seconds.", time.perf_counter() - start
-        )
-
-        return self.dataset
-
     def create_slow_stoch_feature(
         self,
         source_column: str,
