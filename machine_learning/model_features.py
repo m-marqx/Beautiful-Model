@@ -861,8 +861,10 @@ class ModelFeatures:
         if not isinstance(source, pd.Series):
             raise ValueError("source must be a pandas Series.")
 
+        dataset = self.dataset.copy()
+
         if use_pct_change:
-            dataset = self.dataset.copy().pct_change().iloc[1:]
+            dataset = dataset.copy().pct_change().iloc[1:]
             source = source.copy().pct_change().iloc[1:]
 
         ichimoku = ta.Ichimoku(
