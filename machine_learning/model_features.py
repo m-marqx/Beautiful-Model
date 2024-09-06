@@ -473,63 +473,6 @@ class ModelFeatures:
 
         return self.dataset
 
-    def create_didi_index_opt_feature(
-        self,
-        source: pd.Series,
-        short_length: int = 3,
-        medium_length: int = 18,
-        long_length: int = 20,
-        ma_type: Literal['sma', 'ema','dema', 'rma'] = 'sma',
-    ):
-        """
-        Create the Didi Index feature.
-
-        Parameters:
-        -----------
-
-        source : pd.Series
-            The source series for calculating the DIDI index.
-        short_length : int, optional
-            The length of the short EMA.
-            (default: 3)
-        medium_length : int, optional
-            The length of the medium EMA.
-            (default: 18)
-        long_length : int, optional
-            The length of the long EMA.
-            (default: 20)
-
-        Returns:
-        --------
-        pd.DataFrame
-            The dataset with the DIDI index feature added.
-        """
-        self.logger.info("Calculating new DIDI index...")
-        start = time.perf_counter()
-        source = source.copy().pct_change().rolling(2).std().iloc[2:]
-
-        self.dataset["DIDI"] = ta.didi_index(
-            source,
-            short_length,
-            medium_length,
-            long_length,
-            ma_type,
-            'ratio',
-            False,
-        ).rolling(2).std().diff()
-
-        self.dataset.loc[:, "DIDI_feat"] = feature_binning(
-            self.dataset["DIDI"],
-            self.test_index,
-            self.bins,
-        )
-
-        self.logger.info(
-            "DIDI index calculated in %.2f seconds.",
-            time.perf_counter() - start
-        )
-
-        return self.dataset
 
     def create_macd_feature(
         self,
