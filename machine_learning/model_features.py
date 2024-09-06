@@ -732,7 +732,7 @@ class ModelFeatures:
         base_periods: int,
         lagging_span_2_periods: int,
         displacement: int,
-        based_on: Literal["lead_line", "leading_span"] = "lagging_span",
+        based_on: Literal["lead_line", "leading_span"] = "leading_span",
         method: Literal["absolute", "ratio", "dtw"] = "absolute",
     ):
         """
