@@ -8,7 +8,6 @@ import pandas as pd
 import tradingview_indicators as ta
 from utils import DynamicTimeWarping
 
-
 def feature_binning(
     feature: pd.Series,
     test_index: str | int,
@@ -47,7 +46,8 @@ def feature_binning(
         )
 
     train_series = (
-        feature.iloc[:test_index].copy() if isinstance(test_index, int)
+        feature.iloc[:test_index].copy()
+        if isinstance(test_index, int)
         else feature.loc[:test_index].copy()
     )
 
