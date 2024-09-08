@@ -8,6 +8,7 @@ import pandas as pd
 import tradingview_indicators as ta
 from utils import DynamicTimeWarping
 
+
 def feature_binning(
     feature: pd.Series,
     test_index: str | int,
@@ -118,7 +119,7 @@ class ModelFeatures:
 
         self.logger = logging.getLogger("Model_Features")
         formatter = logging.Formatter(
-            '%(levelname)s %(asctime)s: %(message)s', datefmt='%H:%M:%S'
+            "%(levelname)s %(asctime)s: %(message)s", datefmt="%H:%M:%S"
         )
 
         handler = logging.StreamHandler()
@@ -163,7 +164,7 @@ class ModelFeatures:
         self,
         source: pd.Series,
         length: int,
-        ma_method: Literal['sma', 'ema', 'dema', 'tema', 'rma'] = 'sma'
+        ma_method: Literal["sma", "ema", "dema", "tema", "rma"] = "sma",
     ):
         """
         Create the RSI (Relative Strength Index) feature.
@@ -228,16 +229,14 @@ class ModelFeatures:
         self.logger.info("Calculating slow stochastic...")
         start = time.perf_counter()
 
-        stoch_k, stoch_d = (
-            ta.slow_stoch(
-                self.dataset[source_column],
-                self.dataset['high'],
-                self.dataset['low'],
-                k_length,
-                k_smoothing,
-                d_smoothing,
-                'sma'
-            )
+        stoch_k, stoch_d = ta.slow_stoch(
+            self.dataset[source_column],
+            self.dataset["high"],
+            self.dataset["low"],
+            k_length,
+            k_smoothing,
+            d_smoothing,
+            "sma",
         )
 
         if self.normalize:
@@ -352,7 +351,7 @@ class ModelFeatures:
         self,
         source: pd.Series,
         length: int = 20,
-        method: Literal['sma', 'ema', 'dema', 'tema', 'rma'] = 'sma',
+        method: Literal["sma", "ema", "dema", "tema", "rma"] = "sma",
     ):
         """
         Create the CCI (Commodity Channel Index) feature.
@@ -376,7 +375,7 @@ class ModelFeatures:
         self.logger.info("Calculating CCI...")
         start = time.perf_counter()
 
-        self.dataset['CCI'] =  ta.CCI(source, length, method=method)['CCI']
+        self.dataset["CCI"] = ta.CCI(source, length, method=method)["CCI"]
 
         self.dataset.loc[:, "CCI_feat"] = feature_binning(
             self.dataset["CCI"],
@@ -396,8 +395,8 @@ class ModelFeatures:
         short_length: int = 3,
         medium_length: int = 18,
         long_length: int = 20,
-        ma_type: Literal['sma', 'ema','dema','tema', 'rma'] = 'sma',
-        method: Literal['absolute', 'ratio', 'dtw'] = 'absolute',
+        ma_type: Literal["sma", "ema", "dema", "tema", "rma"] = "sma",
+        method: Literal["absolute", "ratio", "dtw"] = "absolute",
     ):
         """
         Create the Didi Index feature.
@@ -433,15 +432,20 @@ class ModelFeatures:
         if self.normalize:
             source = source.copy().pct_change().rolling(2).std().iloc[2:]
 
-            self.dataset["DIDI"] = ta.didi_index(
-                source,
-                short_length,
-                medium_length,
-                long_length,
-                ma_type,
-                'ratio',
-                False,
-            ).rolling(2).std().diff()
+            self.dataset["DIDI"] = (
+                ta.didi_index(
+                    source,
+                    short_length,
+                    medium_length,
+                    long_length,
+                    ma_type,
+                    "ratio",
+                    False,
+                )
+                .rolling(2)
+                .std()
+                .diff()
+            )
         else:
             is_dtw_distance = False
 
@@ -459,7 +463,6 @@ class ModelFeatures:
                 is_dtw_distance,
             )
 
-
         self.dataset.loc[:, "DIDI_feat"] = feature_binning(
             self.dataset["DIDI"],
             self.test_index,
@@ -468,7 +471,7 @@ class ModelFeatures:
 
         self.logger.info(
             "DIDI index calculated in %.2f seconds.",
-            time.perf_counter() - start
+            time.perf_counter() - start,
         )
 
         return self.dataset
@@ -479,10 +482,10 @@ class ModelFeatures:
         fast_length: int = 12,
         slow_length: int = 26,
         signal_length: int = 9,
-        diff_method: Literal['absolute', 'ratio', 'dtw'] = 'absolute',
-        ma_method: Literal['sma', 'ema','dema','tema', 'rma'] = 'ema',
-        signal_method: Literal['sma', 'ema','dema','tema', 'rma'] = 'ema',
-        column: Literal['macd', 'signal', 'histogram'] = 'histogram',
+        diff_method: Literal["absolute", "ratio", "dtw"] = "absolute",
+        ma_method: Literal["sma", "ema", "dema", "tema", "rma"] = "ema",
+        signal_method: Literal["sma", "ema", "dema", "tema", "rma"] = "ema",
+        column: Literal["macd", "signal", "histogram"] = "histogram",
     ):
         """
         Create the MACD index feature.
@@ -522,22 +525,27 @@ class ModelFeatures:
         start = time.perf_counter()
 
         if self.normalize:
-            if column != 'histogram':
+            if column != "histogram":
                 warnings.warn(
                     f"{column} isn't compatible with normalization"
                     + " and will be set to 'histogram'."
                 )
             source = source.copy().pct_change().rolling(2).std().iloc[2:]
 
-            self.dataset["MACD"] = ta.MACD(
-                source=source,
-                fast_length=fast_length,
-                slow_length=slow_length,
-                signal_length=signal_length,
-                diff_method='ratio',
-                ma_method=ma_method,
-                signal_method=signal_method,
-            )['histogram'].rolling(2).std().diff()
+            self.dataset["MACD"] = (
+                ta.MACD(
+                    source=source,
+                    fast_length=fast_length,
+                    slow_length=slow_length,
+                    signal_length=signal_length,
+                    diff_method="ratio",
+                    ma_method=ma_method,
+                    signal_method=signal_method,
+                )["histogram"]
+                .rolling(2)
+                .std()
+                .diff()
+            )
 
         else:
             self.dataset["MACD"] = ta.MACD(
@@ -558,7 +566,7 @@ class ModelFeatures:
 
         self.logger.info(
             "MACD index calculated in %.2f seconds.",
-            time.perf_counter() - start
+            time.perf_counter() - start,
         )
 
         return self.dataset
@@ -568,7 +576,7 @@ class ModelFeatures:
         source: pd.Series,
         length: int = 15,
         signal_length: int = 1,
-        method: Literal['sma', 'ema', 'dema', 'tema', 'rma'] = 'ema',
+        method: Literal["sma", "ema", "dema", "tema", "rma"] = "ema",
     ):
         """
         Create the TRIX (Triple Exponential Moving Average) feature.
@@ -604,7 +612,12 @@ class ModelFeatures:
                 .diff()
             )
         else:
-            self.dataset["TRIX"] = ta.TRIX(source, length, signal_length, method)
+            self.dataset["TRIX"] = ta.TRIX(
+                source,
+                length,
+                signal_length,
+                method,
+            )
 
         self.dataset.loc[:, "TRIX_feat"] = feature_binning(
             self.dataset["TRIX"],
@@ -624,7 +637,7 @@ class ModelFeatures:
         short_length: int = 20,
         long_length: int = 5,
         signal_length: int = 5,
-        ma_type: Literal['sma', 'ema', 'dema', 'tema', 'rma'] = 'ema',
+        ma_type: Literal["sma", "ema", "dema", "tema", "rma"] = "ema",
     ):
         """
         Create the SMIO (SMI Ergotic Oscillator) feature.
@@ -677,7 +690,7 @@ class ModelFeatures:
         source: pd.Series,
         short_length: int = 13,
         long_length: int = 25,
-        ma_type: Literal['sma', 'ema', 'dema', 'tema', 'rma'] = 'ema',
+        ma_type: Literal["sma", "ema", "dema", "tema", "rma"] = "ema",
     ):
         """
         Create the TSI (True Strength Index) feature.
@@ -764,51 +777,49 @@ class ModelFeatures:
             base_periods=base_periods,
             lagging_span_2_periods=lagging_span_2_periods,
             displacement=displacement,
-        )[[
-            "lead_line1",
-            "lead_line2",
-            "leading_span_a",
-            "leading_span_b",
-        ]]
+        )[
+            [
+                "lead_line1",
+                "lead_line2",
+                "leading_span_a",
+                "leading_span_b",
+            ]
+        ]
 
         if method == "absolute":
             lead_line_distance = (
-                ichimoku['lead_line1'] - ichimoku['lead_line2']
+                ichimoku["lead_line1"] - ichimoku["lead_line2"]
             )
 
             leading_span_distance = (
-                ichimoku['leading_span_a'] - ichimoku['leading_span_b']
+                ichimoku["leading_span_a"] - ichimoku["leading_span_b"]
             )
         elif method == "ratio":
             lead_line_distance = (
-                ichimoku['lead_line1'] / ichimoku['lead_line2']
+                ichimoku["lead_line1"] / ichimoku["lead_line2"]
             )
 
             leading_span_distance = (
-                ichimoku['leading_span_a'] / ichimoku['leading_span_b']
+                ichimoku["leading_span_a"] / ichimoku["leading_span_b"]
             )
 
         elif method == "dtw":
             lead_line_distance = DynamicTimeWarping(
-                ichimoku['lead_line1'].dropna(),
-                ichimoku['lead_line2'].dropna(),
-            ).calculate_dtw_distance(
-                method="absolute", align_sequences=True,
-            )
+                ichimoku["lead_line1"].dropna(),
+                ichimoku["lead_line2"].dropna(),
+            ).calculate_dtw_distance(method="absolute", align_sequences=True)
 
             leading_span_distance = DynamicTimeWarping(
-                ichimoku['leading_span_a'].dropna(),
-                ichimoku['leading_span_b'].dropna(),
-            ).calculate_dtw_distance(
-                method="absolute", align_sequences=True,
-            )
+                ichimoku["leading_span_a"].dropna(),
+                ichimoku["leading_span_b"].dropna(),
+            ).calculate_dtw_distance(method="absolute", align_sequences=True)
         else:
             raise ValueError(f"method '{method}' not found.")
 
         if based_on == "lead_line":
-            self.dataset['ichimoku_distance'] = lead_line_distance
+            self.dataset["ichimoku_distance"] = lead_line_distance
         elif based_on == "leading_span":
-            self.dataset['ichimoku_distance'] = leading_span_distance
+            self.dataset["ichimoku_distance"] = leading_span_distance
         else:
             raise ValueError(f"'{based_on}' is a invalid parameter.")
 
@@ -873,40 +884,48 @@ class ModelFeatures:
             base_periods=base_periods,
             lagging_span_2_periods=lagging_span_2_periods,
             displacement=displacement,
-        )[[
-            "lead_line1",
-            "lead_line2",
-            "leading_span_a",
-            "leading_span_b",
-        ]]
+        )[
+            [
+                "lead_line1",
+                "lead_line2",
+                "leading_span_a",
+                "leading_span_b",
+            ]
+        ]
 
-        ichimoku['source'] = source
+        ichimoku["source"] = source
 
-        if based_on == 'leading_span':
-            line1 = ichimoku['leading_span_a']
-            line2 = ichimoku['leading_span_b']
-        elif based_on == 'lead_line':
-            line1 = ichimoku['lead_line1']
-            line2 = ichimoku['lead_line2']
+        if based_on == "leading_span":
+            line1 = ichimoku["leading_span_a"]
+            line2 = ichimoku["leading_span_b"]
+        elif based_on == "lead_line":
+            line1 = ichimoku["lead_line1"]
+            line2 = ichimoku["lead_line2"]
         else:
             raise ValueError(
                 "based_on parameter must be 'lead_line' or 'leading_span'"
             )
 
-        if method == 'absolute':
-            line1_distance = abs(ichimoku['source'] - line1)
-            line2_distance = abs(ichimoku['source'] - line2)
-        elif method == 'ratio':
-            line1_distance = abs(ichimoku['source'] / line1)
-            line2_distance = abs(ichimoku['source'] / line2)
-        elif method == 'dtw':
+        if method == "absolute":
+            line1_distance = abs(ichimoku["source"] - line1)
+            line2_distance = abs(ichimoku["source"] - line2)
+        elif method == "ratio":
+            line1_distance = abs(ichimoku["source"] / line1)
+            line2_distance = abs(ichimoku["source"] / line2)
+        elif method == "dtw":
             line1_distance = abs(
-                DynamicTimeWarping(ichimoku['source'], line1.fillna(ichimoku['source']))
-                .calculate_dtw_distance(method='absolute', align_sequences=True)
+                DynamicTimeWarping(
+                    ichimoku["source"], line1.fillna(ichimoku["source"])
+                ).calculate_dtw_distance(
+                    method="absolute", align_sequences=True
+                )
             )
             line2_distance = abs(
-                DynamicTimeWarping(ichimoku['source'], line2.fillna(ichimoku['source']))
-                .calculate_dtw_distance(method='absolute', align_sequences=True)
+                DynamicTimeWarping(
+                    ichimoku["source"], line2.fillna(ichimoku["source"])
+                ).calculate_dtw_distance(
+                    method="absolute", align_sequences=True
+                )
             )
         else:
             raise ValueError(
@@ -914,17 +933,16 @@ class ModelFeatures:
             )
 
         ichimoku_df = pd.concat([
-            line1_distance.rename('diff_line1'),
-            line2_distance.rename('diff_line2'),
+            line1_distance.rename("diff_line1"),
+            line2_distance.rename("diff_line2"),
         ], axis=1)
 
-        ichimoku_df['minimum_distance'] = np.where(
-            ichimoku_df['diff_line1'] < ichimoku_df['diff_line2'],
-            line1, line2
+        ichimoku_df["minimum_distance"] = np.where(
+            ichimoku_df["diff_line1"] < ichimoku_df["diff_line2"], line1, line2
         )
 
-        self.dataset['ichimoku_distance'] = (
-            ichimoku['source'] - ichimoku_df['minimum_distance']
+        self.dataset["ichimoku_distance"] = (
+            ichimoku["source"] - ichimoku_df["minimum_distance"]
         )
 
         self.dataset.loc[:, "ichimoku_distance_feat"] = feature_binning(
@@ -934,7 +952,8 @@ class ModelFeatures:
         )
 
         self.logger.info(
-            "Ichimoku distance calculated in %.2f seconds.", time.perf_counter() - start
+            "Ichimoku distance calculated in %.2f seconds.",
+            time.perf_counter() - start,
         )
 
         return self.dataset
@@ -945,10 +964,10 @@ class ModelFeatures:
         short_length: int = 13,
         long_length: int = 25,
         stdev_multiplier: float = 2.0,
-        ma_type: Literal['sma', 'ema', 'dema', 'tema', 'rma'] = 'ema',
-        stdev_method: Literal['absolute', 'ratio', 'dtw'] = 'absolute',
-        diff_method: Literal['absolute', 'ratio', 'normal'] = 'normal',
-        based_on: Literal['short_length', 'long_length'] = 'long_length',
+        ma_type: Literal["sma", "ema", "dema", "tema", "rma"] = "ema",
+        stdev_method: Literal["absolute", "ratio", "dtw"] = "absolute",
+        diff_method: Literal["absolute", "ratio", "normal"] = "normal",
+        based_on: Literal["short_length", "long_length"] = "long_length",
     ):
         """
         Create the BB Trend (Bollinger Bands Trend) feature.
@@ -991,10 +1010,7 @@ class ModelFeatures:
 
         if self.normalize:
             self.dataset["bb_trend"] = (
-                self.dataset["bb_trend"]
-                .rolling(2)
-                .std()
-                .diff()
+                self.dataset["bb_trend"].rolling(2).std().diff()
             )
 
         self.dataset.loc[:, "bb_trend_feat"] = feature_binning(
