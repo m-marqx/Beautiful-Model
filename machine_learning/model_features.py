@@ -932,10 +932,10 @@ class ModelFeatures:
                 "method parameter must be 'absolute', 'ratio', or 'dtw'"
             )
 
-        ichimoku_df = pd.concat([
-            line1_distance.rename("diff_line1"),
-            line2_distance.rename("diff_line2"),
-        ], axis=1)
+        line1_distance = line1_distance.rename("diff_line1")
+        line2_distance = line2_distance.rename("diff_line2")
+
+        ichimoku_df = pd.concat([line1_distance, line2_distance], axis=1)
 
         ichimoku_df["minimum_distance"] = np.where(
             ichimoku_df["diff_line1"] < ichimoku_df["diff_line2"], line1, line2
