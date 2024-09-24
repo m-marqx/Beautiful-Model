@@ -966,6 +966,7 @@ class DataHandler:
 def get_recommendation(
     predict_series,
     return_dtype: Literal["string", "normal", "int", "bool"] = "string",
+    add_span_tag: bool = False,
 ):
     """
     Generate trading recommendations based on the prediction series.
@@ -988,6 +989,12 @@ def get_recommendation(
         (True for positive, False otherwise).
 
         (default:'string')
+    add_span_tag : bool, optional
+        If True, the recommendations are returned as HTML strings with
+        span tags for color formatting. If False, the recommendations
+        are returned as plain text. (compatible with itables)
+
+        (default: False)
 
     Returns
     -------
@@ -1006,15 +1013,40 @@ def get_recommendation(
         name=predict.name,
     )
     signals = pd.concat([confirmed_signals, unconfirmed_signal])
+    if add_span_tag:
+        long_color = "<b><span style='color: #00e676'>Open Position</span></b>"
+        do_nothing_color = ""
+        short_color = "<b><span style='color: #ef5350'>Close Position</span></b>"
+    else:
+        long_color = "Open Position"
+        do_nothing_color = ""
+        short_color = "Close Position"
 
     match return_dtype:
         case "string":
             recommendation = np.where(
                 signals > 0,
-                "Long",
-                np.where(signals == 0, "Do Nothing", "Short"),
+                long_color,
+                np.where(signals == 0, do_nothing_color, short_color),
             )
-            return pd.Series(recommendation, index=signals.index)
+            recommendation_series = pd.Series(
+                recommendation, index=signals.index
+            )
+
+            recommendation_array = np.where(
+                np.logical_and(
+                    recommendation_series.shift(7) == long_color,
+                    recommendation_series == do_nothing_color,
+                ),
+                short_color,
+                recommendation_series,
+            )
+
+            return pd.Series(
+                recommendation_array,
+                index=recommendation_series.index,
+                name=recommendation_series.name,
+            )
 
         case "normal":
             return signals
