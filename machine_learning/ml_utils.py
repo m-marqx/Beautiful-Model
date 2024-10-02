@@ -963,6 +963,7 @@ class DataHandler:
                     variable |= self.data_frame[column] <= x
         return variable
 
+
 def get_recommendation(
     predict_series,
     return_dtype: Literal["string", "normal", "int", "bool"] = "string",
@@ -1007,12 +1008,14 @@ def get_recommendation(
     predict = predict.rename_axis("date")
 
     confirmed_signals = pd.Series(predict.iloc[:-1], name=predict.name)
+
     unconfirmed_signal = pd.Series(
         predict.iloc[-1],
         index=["Unconfirmed"],
-        name=predict.name,
     )
+
     signals = pd.concat([confirmed_signals, unconfirmed_signal])
+
     if add_span_tag:
         long_color = "<b><span style='color: #00e676'>Open Position</span></b>"
         do_nothing_color = "——————"
@@ -1046,7 +1049,7 @@ def get_recommendation(
             return pd.Series(
                 recommendation_array,
                 index=recommendation_series.index,
-                name=recommendation_series.name,
+                name=predict.name,
             )
 
         case "normal":
