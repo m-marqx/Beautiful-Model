@@ -1060,3 +1060,108 @@ def get_recommendation(
 
         case "bool":
             return signals > 0
+
+def get_recommendation_trades(predict_series):
+    """
+    Generate trading recommendations based on the signal and price series.
+
+    This function generates trading recommendations based on the signal
+    series and the price series. It returns a DataFrame containing the
+    trading recommendations and the corresponding prices.
+
+    Parameters
+    ----------
+
+    predict_series : pd.Series
+        A pandas Series containing the prediction values.
+
+    Returns
+    -------
+    pd.DataFrame
+        A DataFrame containing the trading recommendations and the
+        corresponding prices.
+    """
+    open_pos_name = "<b><span style='color: #00e676'>Open Position</span></b>"
+    close_pos_name = (
+        "<b><span style='color: #ef5350'>Close Position</span></b>"
+    )
+
+    str_recommendation = get_recommendation(predict_series, "string", True)
+    int_recommentation = str_recommendation.to_frame()
+
+    col = int_recommentation.columns[0]
+
+    int_recommentation[col] = np.where(
+        int_recommentation[col] == open_pos_name,
+        1,
+        int_recommentation[col],
+    )
+
+    int_recommentation[col] = np.where(
+        int_recommentation[col] == close_pos_name,
+        -1,
+        int_recommentation[col],
+    )
+
+    int_recommentation[col] = np.where(
+        int_recommentation[col] == "——————",
+        0,
+        int_recommentation[col],
+    )
+
+    int_recommentation.columns = [
+        col + "_int" for col in int_recommentation.columns
+    ]
+    int_recommentation = int_recommentation.iloc[:-1]
+
+    str_recommendation = str_recommendation.iloc[:-1]
+    str_recommendation.index = pd.DatetimeIndex(
+        str_recommendation.index.tolist()
+    )
+    int_recommentation.index = pd.DatetimeIndex(
+        int_recommentation.index.tolist()
+    )
+
+    close_pos = (
+        int_recommentation[int_recommentation < 0]
+        .loc[datetime.date(2024, 9, 15) :]
+        .cumsum()
+    )
+    open_pos = (
+        int_recommentation[int_recommentation > 0]
+        .loc[datetime.date(2024, 9, 15) :]
+        .cumsum()
+    )
+
+    int_recommentation = close_pos.combine_first(open_pos)
+
+    trade_recommendation = pd.concat(
+        [str_recommendation, int_recommentation], axis=1
+    )
+    trade_recommendation = trade_recommendation.fillna("")
+
+    col = trade_recommendation.columns[0]
+
+    trade_recommendation[col] = np.where(
+        trade_recommendation[col + "_int"] == "",
+        "——————",
+        trade_recommendation[col],
+    )
+    trade_recommendation[col] = np.where(
+        trade_recommendation[col] == close_pos_name,
+        trade_recommendation[col]
+        + " ("
+        + trade_recommendation[col + "_int"].astype(str)
+        + ")",
+        trade_recommendation[col],
+    )
+    trade_recommendation[col] = np.where(
+        trade_recommendation[col] == open_pos_name,
+        trade_recommendation[col]
+        + " ("
+        + trade_recommendation[col + "_int"].astype(str)
+        + ")",
+        trade_recommendation[col],
+    )
+
+    return trade_recommendation.iloc[:, 0]
