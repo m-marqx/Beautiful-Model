@@ -888,8 +888,7 @@ class DataHandler:
         )
 
         split_data = (
-            split_data.iloc[:, 1] if split_data.shape[1] == 2
-            else split_data
+            split_data.iloc[:, 1] if split_data.shape[1] == 2 else split_data
         )
 
         if higher_than_threshold:
@@ -901,28 +900,26 @@ class DataHandler:
         variable_intervals = {}
 
         for x in enumerate(intervals):
-            variable_intervals[f'interval_{x[0]}'] = x[1]
+            variable_intervals[f"interval_{x[0]}"] = x[1]
 
         if data.shape[0] > 0:
             lower_bound = (
-                data.index[0].right if data.iloc[0] > threshold
-                else None
+                data.index[0].right if data.iloc[0] > threshold else None
             )
 
             upper_bound = (
-                data.index[-1].left if data.iloc[-1] > threshold
-                else None
+                data.index[-1].left if data.iloc[-1] > threshold else None
             )
 
-            variable_intervals['upper_bound'] = upper_bound
-            variable_intervals['lower_bound'] = lower_bound
+            variable_intervals["upper_bound"] = upper_bound
+            variable_intervals["lower_bound"] = lower_bound
 
         return variable_intervals
 
     def calculate_intervals_variables(
         self,
         column: str,
-        intervals: dict
+        intervals: dict,
     ) -> pd.Series:
         """
         Get a binary variable based on specified intervals.
