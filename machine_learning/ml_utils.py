@@ -791,8 +791,7 @@ class DataHandler:
         )
 
         split_data = (
-            split_data.iloc[:, 1] if split_data.shape[1] == 2
-            else split_data
+            split_data.iloc[:, 1] if split_data.shape[1] == 2 else split_data
         )
 
         if higher_than_threshold:
@@ -806,10 +805,7 @@ class DataHandler:
         for x in intervals:
             variable |= self.data_frame[column].between(x[0], x[1])
 
-        lower_bound = (
-            data.index[0].right if data.iloc[0] > threshold
-            else None
-        )
+        lower_bound = data.index[0].right if data.iloc[0] > threshold else None
 
         upper_bound = (
             data.index[-1].left if data.iloc[-1] > threshold
