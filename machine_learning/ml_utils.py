@@ -652,9 +652,9 @@ class DataHandler:
             proportions, depending on the chosen method and split type.
         """
         if method in ["prod", "sum"]:
-            split_type = 'data'
-        elif method in ["simple","ratio"]:
-            split_type = 'frequency'
+            split_type = "data"
+        elif method in ["simple", "ratio"]:
+            split_type = "frequency"
         else:
             raise ValueError(
                 "method must be prod, sum,"
@@ -671,10 +671,7 @@ class DataHandler:
 
         if isinstance(quantiles, int):
             range_step = 1 / quantiles
-            quantiles = np.quantile(
-                feature,
-                np.arange(0, 1.01, range_step)
-            )
+            quantiles = np.quantile(feature, np.arange(0, 1.01, range_step))
 
             quantiles = np.unique(quantiles)
 
@@ -701,17 +698,14 @@ class DataHandler:
         feature_name = column if column else "feature"
 
         quantile_df = pd.DataFrame(
-            {
-                feature_name: class_df,
-                target_name: target
-            }
+            {feature_name: class_df, target_name: target}
         )
-        if split_type == 'data':
+        if split_type == "data":
             quantile_df = quantile_df.groupby(feature_name)[target_name]
 
-            if method == 'sum':
+            if method == "sum":
                 quantile_df = quantile_df.sum()
-            if method == 'prod':
+            if method == "prod":
                 if log_values:
                     quantile_df = np.log(quantile_df.prod())
                 else:
@@ -724,10 +718,7 @@ class DataHandler:
             )
 
             if method == "ratio":
-                quantile_df = (
-                    quantile_df
-                    .div(quantile_df.sum(axis=1), axis=0)
-                )
+                quantile_df = quantile_df.div(quantile_df.sum(axis=1), axis=0)
         return quantile_df
 
     def get_split_variable(
