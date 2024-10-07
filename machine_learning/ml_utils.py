@@ -549,7 +549,7 @@ class DataHandler:
 
     def fill_outlier(
         self,
-        column: str = None,
+        column: str | None = None,
         iqr_scale: float = 1.5,
         upper_quantile: float = 0.75,
         down_quantile: float = 0.25,
@@ -593,15 +593,11 @@ class DataHandler:
         upper_bound, lower_bound = self.calculate_outlier_values(*outlier_args)
 
         outlier_array = np.where(
-            outlier_array > upper_bound,
-            upper_bound,
-            outlier_array
+            outlier_array > upper_bound, upper_bound, outlier_array
         )
 
         outlier_array = np.where(
-            outlier_array < lower_bound,
-            lower_bound,
-            outlier_array
+            outlier_array < lower_bound, lower_bound, outlier_array
         )
 
         return pd.Series(outlier_array, index=self.data_frame.index)
