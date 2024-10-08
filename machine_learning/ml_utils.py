@@ -457,16 +457,10 @@ class DataHandler:
             positive_mean = positive[result_column].mean()
             negative_mean = negative[result_column].mean()
 
-        win_rate = (
-            positive.shape[0]
-            / (positive.shape[0] + negative.shape[0])
-        )
+        win_rate = positive.shape[0] / (positive.shape[0] + negative.shape[0])
 
-        expected_return = (
-            positive_mean
-            * win_rate
-            - negative_mean
-            * (win_rate - 1)
+        expected_return = positive_mean * win_rate - negative_mean * (
+            win_rate - 1
         )
 
         payoff = positive_mean / abs(negative_mean)
@@ -476,18 +470,17 @@ class DataHandler:
             "Win_Rate": win_rate,
             "Positive_Mean": positive_mean,
             "Negative_Mean": negative_mean,
-            "Payoff" : payoff,
-            "Observations" : positive.shape[0] + negative.shape[0],
+            "Payoff": payoff,
+            "Observations": positive.shape[0] + negative.shape[0],
         }
 
         stats_str = "Stats %" if is_percentage_data else "Stats"
         if output_format == "Series":
             return pd.Series(results).rename(stats_str)
         if output_format == "DataFrame":
-            return pd.DataFrame(
-                results,
-                index=["Value"]
-            ).T.rename_axis(stats_str)
+            return pd.DataFrame(results, index=["Value"]).T.rename_axis(
+                stats_str
+            )
 
         return results
 
